@@ -1,7 +1,10 @@
 package com.smu.selenium.gecco;
 
 import com.smu.selenium.util.PropertiesUtil;
-import org.openqa.selenium.By;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -23,6 +26,7 @@ public class GeccoDriver {
     private final static String CONFIG_PROPERTIES_PATH = "systemConfig.properties";
 
     private static Properties configProperties = new PropertiesUtil(CONFIG_PROPERTIES_PATH).getProperties();
+
     /**
      * 获取火狐浏览器驱动
      *
@@ -51,7 +55,10 @@ public class GeccoDriver {
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.setBinary(pathToBinary);
         chromeOptions.setHeadless(true);
+       /* Proxy proxy = new Proxy();
+        chromeOptions.setProxy(proxy);*/
         ChromeDriver chromeDriver = new ChromeDriver(chromeOptions);
+        chromeDriver.manage().timeouts().implicitlyWait(3,TimeUnit.SECONDS);
         return chromeDriver;
     }
 
@@ -64,13 +71,29 @@ public class GeccoDriver {
             driver.get(url);
             System.out.println("标题：" + driver.getCurrentUrl());
             WebElement nextElement = driver.findElementByClassName("page-next");
-            String elementAttribute = nextElement.getAttribute("href");
+            getTitileUrl(driver);
+            /*String elementAttribute = nextElement.getAttribute("href");
             driver.get(elementAttribute);
-            System.out.println("下一个元素内容" + driver.getCurrentUrl());
+            System.out.println("下一个元素内容" + driver.getCurrentUrl());*/
         } finally {
             driver.quit();
         }
         long endMillis = System.currentTimeMillis();
         System.out.println("耗时：" + (endMillis - startMillis) / 1000);
     }
+
+    public static void getTitileUrl(ChromeDriver driver) {
+        String pageSource = driver.getPageSource();
+        Document document = Jsoup.parse(pageSource);
+        Elements elements = document.getElementsByClass("page-next");
+        String href = "https:" + elements.attr("href");
+        System.out.println("下一个地址:" + href);
+        if(href.equals("https:") || href==null){
+            System.out.println(pageSource);
+        }else{
+            driver.get(href);
+            getTitileUrl(driver);
+        }
+    }
+
 }
