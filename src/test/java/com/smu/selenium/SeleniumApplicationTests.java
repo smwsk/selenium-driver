@@ -1,7 +1,7 @@
 package com.smu.selenium;
 
-import com.smu.selenium.entity.User;
-import com.smu.selenium.mapper.UserMapper;
+import com.smu.selenium.sys.entity.User;
+import com.smu.selenium.sys.service.IUserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +15,12 @@ import java.util.List;
 public class SeleniumApplicationTests {
 
     @Autowired
-    private UserMapper userMapper;
+    IUserService userService;
 
     @Test
     public void contextLoads() {
-
-        List<User> users = userMapper.selectList(null);
-        for(User user: users){
+        List<User> list = userService.list();
+        for(User user: list){
             System.out.println(user.getName());
         }
     }
